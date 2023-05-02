@@ -1,27 +1,27 @@
 #include <EEPROM.h>
-// выходы arduino для датчика линии
+
+// announcement of pins to which sensors are connected
 #define IR1 A7  // A7
 #define IR2 A12 // A12
 #define IR3 A13 // A13
 #define IR4 A15 // A15
 #define IR5 A14 // A14
-//#define KN 29
 
-//Максимальный коэфициент для датчиков
+//the maximum coefficient for the sensor (taken from the bit depth of the analog signal)
 int IR1NOW = 0;
 int IR2NOW = 0;
 int IR3NOW = 0;
 int IR4NOW = 0;
 int IR5NOW = 0; 
 
-//Минимальные коэфициент для датчиков (берется с максимального значения аналогового сигнала)
+//the minimum coefficient for the sensor (taken from the bit depth of the analog signal)
 int IR1NOWMIN = 1024;
 int IR2NOWMIN = 1024;
 int IR3NOWMIN = 1024;
 int IR4NOWMIN = 1024;
 int IR5NOWMIN = 1024;
 
-//Средний коэфициент  для датчиков
+//variables for the average value
 int KIR1;
 int KIR2;
 int KIR3;
@@ -32,20 +32,19 @@ unsigned long Time, PreviousTime;
 long Period = 15000; 
 
 void setup() {
-  // put your setup code here, to run once:
+  
   Serial.begin(9600);
   pinMode(IR1, INPUT);   
   pinMode(IR2, INPUT);  
   pinMode(IR3, INPUT);   
   pinMode(IR4, INPUT);   
-  pinMode(IR5, INPUT);
-//  pinMode(KN, INPUT); 
+  pinMode(IR5, INPUT); 
   PreviousTime = millis();
 }
 
 void loop() {
 
-// подбор максимальных значений
+// selection of maximum values
 
   if (analogRead(IR1) > IR1NOW) 
   {
@@ -68,7 +67,7 @@ void loop() {
     IR5NOW = analogRead(IR5);   
   }
 
-//подбор минимальных значений
+//selection of minimum values
 
   if (analogRead(IR1) < IR1NOWMIN) 
   {
@@ -90,71 +89,37 @@ void loop() {
   {
     IR5NOWMIN = analogRead(IR5);   
   }
+  
   Time = millis();
-      Serial.print("Коеф для 1 :");
-     Serial.println(IR1NOW);
+
+  if(Time - PreviousTime > Period)
+  {
+     KIR1 = (IR1NOW + IR1NOWMIN)/2;
+     KIR2 = (IR2NOW + IR2NOWMIN)/2;
+     KIR3 = (IR3NOW + IR3NOWMIN)/2;
+     KIR4 = (IR4NOW + IR4NOWMIN)/2;
+     KIR5 = (IR5NOW + IR5NOWMIN)/2;
+        
+     Serial.print("Коеф для 1 :");
+     Serial.println(KIR1);
      Serial.print("Коеф для 2 :");
-     Serial.println(IR2NOW);
+     Serial.println(KIR2);
      Serial.print("Коеф для 3 :");
-     Serial.println(IR3NOW);
+     Serial.println(KIR3);
      Serial.print("Коеф для 4 :");
-     Serial.println(IR4NOW);
+     Serial.println(KIR4);
      Serial.print("Коеф для 5 :");
-     Serial.println(IR5NOW);
-//  if(Time - PreviousTime > Period)
-//  {
-//     KIR1 = (IR1NOW + IR1NOWMIN)/2;
-//     KIR2 = (IR2NOW + IR2NOWMIN)/2;
-//     KIR3 = (IR3NOW + IR3NOWMIN)/2;
-//     KIR4 = (IR4NOW + IR4NOWMIN)/2;
-//     KIR5 = (IR5NOW + IR5NOWMIN)/2;
-//     
-//     Serial.print("Коеф для 1 :");
-//     Serial.println(IR1NOW);
-//     Serial.print("Коеф для 2 :");
-//     Serial.println(IR2NOW);
-//     Serial.print("Коеф для 3 :");
-//     Serial.println(IR3NOW);
-//     Serial.print("Коеф для 4 :");
-//     Serial.println(IR4NOW);
-//     Serial.print("Коеф для 5 :");
-//     Serial.println(IR5NOW);
+     Serial.println(KIR5);
 
-//      Запись средних коэфициентов в ПЗУ
-//     EEPROM.update(10, KIR1);
-//     EEPROM.update(12, KIR2);
-//     EEPROM.update(14, KIR3);
-//     EEPROM.update(16, KIR4);
-//     EEPROM.update(18, KIR5); 
+//Recording average coefficients in PROM
+     EEPROM.update(10, KIR1);
+     EEPROM.update(12, KIR2);
+     EEPROM.update(14, KIR3);
+     EEPROM.update(16, KIR4);
+     EEPROM.update(18, KIR5);
 
-//     Serial.end();
-
-//     Serial.println(EEPROM.read(10));
-//     Serial.println(EEPROM.read(12));
-//     Serial.println(EEPROM.read(14));
-//     Serial.println(EEPROM.read(16));
-//     Serial.println(EEPROM.read(18));    
+     Serial.end();
   }
-//    analogRead(IR1);
-//    analogRead(IR2);
-//    analogRead(IR3);
-//    analogRead(IR4);
-//    analogRead(IR5);
-//int    QT1 = analogRead(IR1);
-//int    QT2 = analogRead(IR2);
-//int    QT3 = analogRead(IR3);
-//int    QT4 = analogRead(IR4);
-//int    QT5 = analogRead(IR5);
-//
-//
-//     Serial.print("Коеф для 1 :"); // четвертый A7
-//     Serial.println(QT1);
-//     Serial.print("Коеф для 2 :"); // пятый
-//     Serial.println(QT2);
-//     Serial.print("Коеф для 3 :"); // второй
-//     Serial.println(QT3);
-//     Serial.print("Коеф для 4 :"); // первый 
-//     Serial.println(QT4);
-//     Serial.print("Коеф для 5 :"); //третий 
-//     Serial.println(QT5);
-//}
+    
+}
+  
